@@ -1,10 +1,14 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.views.generic import DetailView
+
 
 #Models
 from django.contrib.auth.models import User
 from users.models import Profile
+from posts.models import Post
 
 #Forms
 from users.forms import ProfileForm, SignupForm
@@ -13,6 +17,31 @@ from users.forms import ProfileForm, SignupForm
 from django.db.utils import IntegrityError
 
 # Create your views here.
+
+
+
+
+
+
+class UserDetailView(LoginRequiredMixin, DetailView):
+
+    template_name = 'users/detail.html'
+    slug_field = 'username'
+    slug_url_kwarg = 'username'
+    queryset = User.objects.all()
+    context_object_name = 'user'
+
+
+    def get_context_data(self, **kwargs):
+
+        #Esto se hacee con el objetivo de agregar al contexto los posts de ese usuario y poderlos pintar
+        context = super().get_context_data(**kwargs)
+        user = self.get_object()
+        context['posts'] = Post.objects.filter(user=user).order_by('-created')
+        return context
+
+
+
 
 @login_required
 def update_profile(request):
@@ -34,8 +63,10 @@ def update_profile(request):
             profile.picture = data['picture']
             profile.save()
 
-            #Para evitar que el formulario sea renviado hay que hacer un refirect
-            return redirect('update_profile')
+            #Para evitar que el formulario sea renviado hay que hacer un redirect
+
+            url = reverse('users:detail', kwargs={'username': request.user.username})
+            return redirect(url)
 
 
 
@@ -67,7 +98,7 @@ def login_view(request):
         if user:
             # Esta linea crea la sesión
             login(request, user)
-            return redirect('feed')
+            return redirect('posts:feed')
         else:
             return render(request, 'users/login.html', {'error': 'Invalid username and password'})
 
@@ -79,7 +110,7 @@ def signup_view(request):
         form = SignupForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('login')
+            return redirect('users:login')
     else:
         form = SignupForm()
     
@@ -94,5 +125,5 @@ def signup_view(request):
 @login_required
 def logout_view(request):
     logout(request)
-    return redirect('login')
+    return redirect('users:login')
 

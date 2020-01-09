@@ -13,3 +13,6 @@ y en el template es donde están los htmls
 NO OBSTANTE
 Para las validaciones de lógica de negocio, es recomendable hacerlo en los forms. Ver caso users/forms. Ahi está toda la lógica 
 para la creación de un usuario y un post. 
+
+Class based views:
+sirven para evitar el tema if post hacer una cosa else (get) hacer otra

@@ -24,8 +24,8 @@ class ProfileCompletionMiddleware:
                     #y si el path que me llega es diferente a update profile o logout
                     #Si no tuviera este if, se generaría un ciclo infinito pq update re-direccionaría a update forever and ever
                     #con logout lo que sucede 
-                    if request.path not in [reverse('update_profile'), reverse('logout')]:
-                        return redirect('update_profile')
+                    if request.path not in [reverse('users:update'), reverse('users:logout')]:
+                        return redirect('users:update')
 
         
         response = self.get_response(request)
