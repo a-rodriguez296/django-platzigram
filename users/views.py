@@ -6,13 +6,54 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from users.models import Profile
 
+#Forms
+from users.forms import ProfileForm
+
 #Exception
 from django.db.utils import IntegrityError
 
 # Create your views here.
 
 def update_profile(request):
-    return render(request, 'users/update_profile.html')
+    
+    profile = request.user.profile
+
+    #Si me llega un post, analizo los datos y hago algo con ellos
+    if request.method == 'POST':
+        
+        #El request.files es para el archivo de la imagen
+        form = ProfileForm(request.POST, request.FILES)
+        
+        if form.is_valid():
+            data = form.cleaned_data
+            
+            profile.website = data['website']
+            profile.biography = data['biography']
+            profile.phone_number = data['phone_number']
+            profile.picture = data['picture']
+            profile.save()
+
+            #Para evitar que el formulario sea renviado hay que hacer un refirect
+            return redirect('update_profile')
+
+
+
+
+    #De lo contrario pinto el form vacio
+    else:
+        form = ProfileForm()
+
+
+    return render(
+        request=request,
+        template_name='users/update_profile.html',
+        context={
+            'profile':profile,
+            'user':request.user,
+            #Se agrega el form en el contexto para q esté disponible en el template
+            'form':form
+        }
+    )
 
 
 def login_view(request):

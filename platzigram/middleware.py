@@ -13,16 +13,19 @@ class ProfileCompletionMiddleware:
         #Esto es lo que se va a llamar en cada request
 
         if not request.user.is_anonymous:
-            profile = request.user.profile
 
-            #Si el usuario no tiene foto o bio
-            if not profile.picture or not profile.biography:
+            #Si no hago esto, el /admin siempre me redireccionaria a update_profile
+            if not request.user.is_staff:
+                profile = request.user.profile
 
-                #y si el path que me llega es diferente a update profile o logout
-                #Si no tuviera este if, se generaría un ciclo infinito pq update re-direccionaría a update forever and ever
-                #con logout lo que sucede 
-                if request.path not in [reverse('update_profile'), reverse('logout')]:
-                    return redirect('update_profile')
+                #Si el usuario no tiene foto o bio
+                if not profile.picture or not profile.biography:
+
+                    #y si el path que me llega es diferente a update profile o logout
+                    #Si no tuviera este if, se generaría un ciclo infinito pq update re-direccionaría a update forever and ever
+                    #con logout lo que sucede 
+                    if request.path not in [reverse('update_profile'), reverse('logout')]:
+                        return redirect('update_profile')
 
         
         response = self.get_response(request)
