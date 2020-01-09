@@ -1,0 +1,15 @@
+Tenemos la arquitectura MVT which stands for 
+model
+view 
+template
+
+
+en el model está el esquema de la base de datos
+
+en el view es donde se asigna que es lo que se va a pintar
+
+y en el template es donde están los htmls
+
+NO OBSTANTE
+Para las validaciones de lógica de negocio, es recomendable hacerlo en los forms. Ver caso users/forms. Ahi está toda la lógica 
+para la creación de un usuario y un post. 
