@@ -16,3 +16,6 @@ para la creación de un usuario y un post.
 
 Class based views:
 sirven para evitar el tema if post hacer una cosa else (get) hacer otra
+
+Página vistas genéricas
+https://ccbv.co.uk/

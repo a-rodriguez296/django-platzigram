@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, reverse
 from django.urls import reverse_lazy
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.views.generic import DetailView, FormView, UpdateView
@@ -18,11 +18,6 @@ from users.forms import SignupForm
 from django.db.utils import IntegrityError
 
 # Create your views here.
-
-
-
-
-
 
 class UserDetailView(LoginRequiredMixin, DetailView):
 
@@ -58,23 +53,9 @@ class UpdateProfile(LoginRequiredMixin, UpdateView):
         return reverse('users:detail', kwargs={'username': username})
 
 
+class LoginView(auth_views.LoginView):
+    template_name = 'users/login.html'
 
-
-def login_view(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        
-
-        user = authenticate(request, username=username, password=password)
-        if user:
-            # Esta linea crea la sesión
-            login(request, user)
-            return redirect('posts:feed')
-        else:
-            return render(request, 'users/login.html', {'error': 'Invalid username and password'})
-
-    return render(request, 'users/login.html')
 
 
 class SignUpView(FormView):
@@ -88,8 +69,7 @@ class SignUpView(FormView):
         return super().form_valid(form)
 
 
-@login_required
-def logout_view(request):
-    logout(request)
-    return redirect('users:login')
+class LogoutView(LoginRequiredMixin, auth_views.LogoutView):
+    #No hay q poner nada
+    template_name = ''
 

@@ -9,12 +9,12 @@ urlpatterns = [
 
     path(
         route='login/', 
-        view=views.login_view, 
+        view=views.LoginView.as_view(), 
         name='login'
     ),
 
 
-    path('logout/', views.logout_view, name='logout'),
+    path('logout/', views.LogoutView.as_view(), name='logout'),
     path('signup/', views.SignUpView.as_view(), name='signup'),
     path('me/profile', views.UpdateProfile.as_view(), name='update'),
 
