@@ -13,7 +13,7 @@ urlpatterns = [
         name='feed'
     ),
 
-    path('posts/new',views.create_post, name='create'),
+    path('posts/new',views.CreatePostView.as_view(), name='create'),
 
     path(
         route='posts/<int:pk>/',

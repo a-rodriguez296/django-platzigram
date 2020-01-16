@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, reverse
+from django.urls import reverse_lazy
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.views.generic import DetailView
+from django.views.generic import DetailView, FormView, UpdateView
 
 
 #Models
@@ -11,7 +12,7 @@ from users.models import Profile
 from posts.models import Post
 
 #Forms
-from users.forms import ProfileForm, SignupForm
+from users.forms import SignupForm
 
 #Exception
 from django.db.utils import IntegrityError
@@ -42,50 +43,21 @@ class UserDetailView(LoginRequiredMixin, DetailView):
 
 
 
+class UpdateProfile(LoginRequiredMixin, UpdateView):
+    template_name = 'users/update_profile.html'
+    model = Profile
+    #No entiendo muy bien pq esto reemplaza el form
+    fields = ['website', 'biography', 'phone_number', 'picture']
 
-@login_required
-def update_profile(request):
-    
-    profile = request.user.profile
+    def get_object(self):
+        #REturn users profile
+        return self.request.user.profile
 
-    #Si me llega un post, analizo los datos y hago algo con ellos
-    if request.method == 'POST':
-        
-        #El request.files es para el archivo de la imagen
-        form = ProfileForm(request.POST, request.FILES)
-        
-        if form.is_valid():
-            data = form.cleaned_data
-            
-            profile.website = data['website']
-            profile.biography = data['biography']
-            profile.phone_number = data['phone_number']
-            profile.picture = data['picture']
-            profile.save()
-
-            #Para evitar que el formulario sea renviado hay que hacer un redirect
-
-            url = reverse('users:detail', kwargs={'username': request.user.username})
-            return redirect(url)
+    def get_success_url(self):
+        username = self.object.user.username
+        return reverse('users:detail', kwargs={'username': username})
 
 
-
-
-    #De lo contrario pinto el form vacio
-    else:
-        form = ProfileForm()
-
-
-    return render(
-        request=request,
-        template_name='users/update_profile.html',
-        context={
-            'profile':profile,
-            'user':request.user,
-            #Se agrega el form en el contexto para q esté disponible en el template
-            'form':form
-        }
-    )
 
 
 def login_view(request):
@@ -105,22 +77,16 @@ def login_view(request):
     return render(request, 'users/login.html')
 
 
-def signup_view(request):
-    if request.method == 'POST':
-        form = SignupForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('users:login')
-    else:
-        form = SignupForm()
-    
-    return render(
-        request=request,
-        template_name='users/signup.html',
-        context={
-            'form':form
-        }
-    )
+class SignUpView(FormView):
+    template_name = 'users/signup.html'
+    form_class = SignupForm
+    success_url = reverse_lazy('users:login')
+
+    def form_valid(self, form):
+
+        form.save()
+        return super().form_valid(form)
+
 
 @login_required
 def logout_view(request):
